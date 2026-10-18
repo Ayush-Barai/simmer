@@ -1,4 +1,4 @@
-const VERSION = "v8";
+﻿const VERSION = "v9";
 const SHELL = `simmer-shell-${VERSION}`;
 const DATA = `simmer-data-${VERSION}`;
 const SHELL_FILES = ["/", "/index.html", "/styles.css", "/app.js", "/manifest.webmanifest", "/icon.svg"];
@@ -48,3 +48,4 @@ self.addEventListener("fetch", (event) => {
       .catch(() => caches.match(request))
   );
 });
+

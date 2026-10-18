@@ -1438,22 +1438,48 @@ function setupLanding() {
   items.forEach((el) => observer.observe(el));
 }
 
+function revealApp(startedAt) {
+  const boot = $("#boot");
+  if (!boot) return Promise.resolve();
+  const wait = Math.max(0, 600 - (performance.now() - startedAt));
+  const settle = wait
+    ? new Promise((resolve) => setTimeout(resolve, wait))
+    : Promise.resolve();
+  return settle
+    .then(
+      () =>
+        new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+    )
+    .then(() => {
+      boot.classList.add("is-done");
+      document.body.removeAttribute("aria-busy");
+      setTimeout(() => boot.remove(), 450);
+    });
+}
+
 async function main() {
-  wireEvents();
-  initTheme();
-  populateLangSelects();
-  setupLanding();
-  const signedIn = await initAuth();
-  await setupAgent();
-  setupVoice();
-  if (!state.authEnabled || signedIn) {
-    await loadRecipes();
-    if (!handleSharedLink()) show("home");
-  } else {
-    show("home");
-  }
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  const startedAt = performance.now();
+  try {
+    wireEvents();
+    initTheme();
+    populateLangSelects();
+    setupLanding();
+    const signedIn = await initAuth();
+    await setupAgent();
+    setupVoice();
+    if (!state.authEnabled || signedIn) {
+      await loadRecipes();
+      if (!handleSharedLink()) show("home");
+    } else {
+      show("home");
+    }
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+  } catch (err) {
+    console.error("Startup failed:", err);
+  } finally {
+    await revealApp(startedAt);
   }
 }
 
