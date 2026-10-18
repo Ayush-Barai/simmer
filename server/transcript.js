@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { sttEnabled, transcribeAudio } from "./stt.js";
 
 const CANDIDATES = [
   ["yt-dlp"],
@@ -103,6 +104,118 @@ export async function fetchTranscript(url) {
     }
     return best;
   } catch {
+    return "";
+  } finally {
+    await rm(dir, { recursive: true, force: true }).catch(() => {});
+  }
+}
+
+function cookieArgs() {
+  const cookies = (process.env.YTDLP_COOKIES || "").trim();
+  return cookies ? ["--cookies", cookies] : [];
+}
+
+export async function fetchVideoMeta(url) {
+  const cmd = await detectYtDlp();
+  if (!cmd) return null;
+
+  const res = await run(
+    cmd,
+    [
+      ...cookieArgs(),
+      "--dump-single-json",
+      "--skip-download",
+      "--no-warnings",
+      "--no-playlist",
+      url,
+    ],
+    45000
+  );
+  if (!res.ok || !res.out.trim()) return null;
+
+  try {
+    const data = JSON.parse(res.out);
+    return {
+      title: data.title || "",
+      description: data.description || "",
+      duration: Number(data.duration) || 0,
+      thumbnail: data.thumbnail || "",
+    };
+  } catch {
+    return null;
+  }
+}
+
+let cachedFfmpeg;
+
+async function hasFfmpeg() {
+  if (cachedFfmpeg !== undefined) return cachedFfmpeg;
+  const res = await run(["ffmpeg"], ["-version"], 10000);
+  cachedFfmpeg = res.ok;
+  return cachedFfmpeg;
+}
+
+const AUDIO_MIME = {
+  ".mp3": "audio/mpeg",
+  ".m4a": "audio/mp4",
+  ".mp4": "video/mp4",
+  ".webm": "audio/webm",
+  ".ogg": "audio/ogg",
+  ".opus": "audio/ogg",
+  ".wav": "audio/wav",
+  ".flac": "audio/flac",
+  ".aac": "audio/aac",
+  ".3gp": "audio/3gpp",
+};
+
+export async function fetchAudioTranscript(url) {
+  if (!sttEnabled()) return "";
+  const cmd = await detectYtDlp();
+  if (!cmd) return "";
+
+  const dir = await mkdtemp(path.join(tmpdir(), "simmer-audio-"));
+  try {
+    const args = [
+      ...cookieArgs(),
+      "--no-playlist",
+      "--no-warnings",
+      "-f",
+      "ba/b",
+      "-o",
+      path.join(dir, "audio.%(ext)s"),
+    ];
+    if (await hasFfmpeg()) {
+      args.push("-x", "--audio-format", "mp3", "--audio-quality", "5");
+    }
+    args.push(url);
+
+    const res = await run(cmd, args, 240000);
+    if (!res.ok) {
+      console.warn("Audio download failed:", (res.err || "").trim().slice(-300));
+      return "";
+    }
+
+    const files = (await readdir(dir)).filter(
+      (f) => !f.endsWith(".part") && !f.endsWith(".ytdl")
+    );
+    if (!files.length) return "";
+
+    let best = { buffer: null, name: "" };
+    for (const file of files) {
+      const buffer = await readFile(path.join(dir, file));
+      if (!best.buffer || buffer.length > best.buffer.length) {
+        best = { buffer, name: file };
+      }
+    }
+    if (!best.buffer) return "";
+
+    const ext = path.extname(best.name).toLowerCase();
+    const mime = AUDIO_MIME[ext] || "application/octet-stream";
+    const text = await transcribeAudio(best.buffer, { filename: best.name, mime });
+    if (!text) console.warn("Audio downloaded but no speech was transcribed.");
+    return text;
+  } catch (err) {
+    console.warn("Audio transcription failed:", err.message);
     return "";
   } finally {
     await rm(dir, { recursive: true, force: true }).catch(() => {});

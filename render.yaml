@@ -19,6 +19,8 @@ services:
         value: EXAVITQu4vr4xnSDxMaL
       - key: ELEVENLABS_AGENT_ID
         sync: false
+      - key: ELEVENLABS_STT_MODEL
+        value: scribe_v1
       - key: CLERK_PUBLISHABLE_KEY
         sync: false
       - key: CLERK_SECRET_KEY

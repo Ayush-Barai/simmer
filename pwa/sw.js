@@ -1,4 +1,4 @@
-﻿const VERSION = "v9";
+﻿const VERSION = "v12";
 const SHELL = `simmer-shell-${VERSION}`;
 const DATA = `simmer-data-${VERSION}`;
 const SHELL_FILES = ["/", "/index.html", "/styles.css", "/app.js", "/manifest.webmanifest", "/icon.svg"];

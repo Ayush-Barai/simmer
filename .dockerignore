@@ -3,6 +3,7 @@ npm-debug.log*
 .env
 .env.*
 !.env.example
+cookies*.txt
 .git
 .gitignore
 .dockerignore

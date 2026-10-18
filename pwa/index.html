@@ -166,7 +166,7 @@
           <span class="marker">actually cook</span>.
         </h1>
         <p class="hero-sub">
-          Share a reel or paste a link. Simmer reads the caption, writes clean steps with real
+          Share a reel or paste a link. Simmer reads the post, writes clean steps with real
           amounts, then talks you through dinner — hands-free, in 10 languages.
         </p>
         <div class="hero-cta">
@@ -245,7 +245,7 @@
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">📲</span>
           <h3>1. Share the reel</h3>
-          <p>Send Simmer a Short, Reel, TikTok or recipe link. Private post? Paste the caption too.</p>
+          <p>Send Simmer a Short, Reel, TikTok or recipe link and it pulls out the recipe.</p>
         </article>
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">✨</span>
@@ -267,7 +267,7 @@
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">🔗</span>
           <h3>From any link</h3>
-          <p>Shorts, Reels, TikToks and recipe blogs. If a post is walled, paste its caption.</p>
+          <p>Shorts, Reels, TikToks and recipe blogs, all turned into one clean cookbook.</p>
         </article>
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">📏</span>
@@ -373,6 +373,21 @@
         </div>
       </div>
     </div>
+
+    <div class="search-row">
+      <div class="searchbar" role="search">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Search recipes, ingredients, tags…"
+          autocomplete="off"
+          aria-label="Search recipes"
+          aria-controls="recipe-list"
+        />
+        <button type="button" class="search-clear" id="search-clear" aria-label="Clear search" hidden>✕</button>
+      </div>
+    </div>
   </header>
 
   <main id="main">
@@ -385,19 +400,17 @@
         <p class="muted">Share a cooking reel into Simmer, or paste a link and we'll save the recipe here.</p>
         <button class="btn btn-primary" data-nav="add">Add your first recipe</button>
       </div>
+      <p id="search-empty" class="search-empty" role="status" aria-live="polite" hidden></p>
       <ul id="recipe-list" class="cards"></ul>
     </section>
 
     <!-- ADD -->
     <section id="view-add" class="view" aria-labelledby="add-title" hidden>
       <h1 id="add-title">Add a recipe</h1>
-      <p class="muted">Paste a link. If the reel is private, paste the caption too and Simmer will do the rest.</p>
+      <p class="muted">Paste a link and Simmer will pull out the ingredients and steps.</p>
       <form id="add-form" class="form">
         <label for="add-url">Recipe link</label>
         <input id="add-url" name="url" type="url" inputmode="url" placeholder="https://youtube.com/shorts/..." autocomplete="off" />
-
-        <label for="add-caption">Caption or recipe text <span class="muted">(optional)</span></label>
-        <textarea id="add-caption" name="caption" rows="6" placeholder="Paste the caption, ingredients or steps from the post..."></textarea>
 
         <button type="submit" class="btn btn-primary" id="add-submit">Turn it into a recipe</button>
         <p id="add-status" class="status" role="status" aria-live="polite"></p>
@@ -506,7 +519,7 @@
   </div>
 
   <footer class="footer">
-    <span class="muted">Built with open AI (Gemma) · <a href="https://hacktoberfest.com" target="_blank" rel="noopener">Hacktoberfest 2026</a> · <span id="app-version">v9</span></span>
+    <span class="muted">Built with open AI (Gemma) · <a href="https://hacktoberfest.com" target="_blank" rel="noopener">Hacktoberfest 2026</a></span>
   </footer>
 
   <script src="/app.js" type="module"></script>

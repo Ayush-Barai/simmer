@@ -41,7 +41,7 @@ app.get("/api/health", (_req, res) => {
 app.post("/api/ingest", requireAuth, async (req, res) => {
   const { url = "", caption = "" } = req.body || {};
   if (!url && !caption) {
-    return res.status(400).json({ error: "Add a link or paste the recipe caption." });
+    return res.status(400).json({ error: "Add a recipe link." });
   }
   try {
     const recipe = await Sentry.startSpan(

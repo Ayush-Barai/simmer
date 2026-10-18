@@ -63,6 +63,7 @@ async function post(model, prompt, generationConfig, key) {
     return { err: new Error(`Model ${model} returned an unreadable response`) };
   }
   const text = (data.candidates?.[0]?.content?.parts || [])
+    .filter((p) => !p.thought)
     .map((p) => p.text || "")
     .join("")
     .trim();

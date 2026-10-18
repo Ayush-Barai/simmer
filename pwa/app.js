@@ -33,6 +33,7 @@ const STOP_WORDS = [
 
 const state = {
   recipes: [],
+  query: "",
   current: null,
   display: null,
   translations: {},
@@ -192,6 +193,7 @@ function handleAuthChange(user) {
     if (!was) loadRecipes();
   } else if (was) {
     closeProfileMenu();
+    resetSearch();
     state.recipes = [];
     state.current = null;
     state.display = null;
@@ -427,13 +429,43 @@ function ingredientLine(ing) {
   return { qty, item: ing.item || "" };
 }
 
+function resetSearch() {
+  state.query = "";
+  const input = $("#search-input");
+  if (input) input.value = "";
+  const clear = $("#search-clear");
+  if (clear) clear.hidden = true;
+}
+
+function recipeMatches(recipe, terms) {
+  const haystack = [
+    recipe.title,
+    ...(recipe.tags || []),
+    ...(recipe.ingredients || []).map((ing) => ing.item),
+    ...(recipe.steps || []),
+  ]
+    .join(" ")
+    .toLowerCase();
+  return terms.every((term) => haystack.includes(term));
+}
+
 function renderHome() {
   const list = $("#recipe-list");
   const empty = $("#home-empty");
+  const searchEmpty = $("#search-empty");
+  const query = state.query.trim();
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const recipes = terms.length ? state.recipes.filter((r) => recipeMatches(r, terms)) : state.recipes;
+
   list.innerHTML = "";
   empty.hidden = state.recipes.length > 0;
+  if (searchEmpty) {
+    const noMatches = terms.length > 0 && recipes.length === 0 && state.recipes.length > 0;
+    searchEmpty.hidden = !noMatches;
+    if (noMatches) searchEmpty.textContent = `No recipes match “${query}”.`;
+  }
 
-  state.recipes.forEach((recipe) => {
+  recipes.forEach((recipe) => {
     const li = document.createElement("li");
     const card = document.createElement("button");
     card.className = "card";
@@ -1267,7 +1299,7 @@ async function addRecipe({ url, caption }) {
   const status = $("#add-status");
   const submit = $("#add-submit");
   status.className = "status";
-  status.textContent = "Reading the recipe and asking Gemma...";
+  status.textContent = "Reading the description and audio... this can take a minute.";
   submit.disabled = true;
   try {
     const recipe = await api("/api/ingest", {
@@ -1276,6 +1308,7 @@ async function addRecipe({ url, caption }) {
     });
     status.textContent = "Saved!";
     $("#add-form").reset();
+    resetSearch();
     await loadRecipes();
     state.current = recipe;
     state.translations = {};
@@ -1305,7 +1338,6 @@ function handleSharedLink() {
   history.replaceState({}, "", "/");
   show("add");
   $("#add-url").value = url;
-  $("#add-caption").value = text;
   addRecipe({ url, caption: text });
   return true;
 }
@@ -1354,9 +1386,33 @@ function wireEvents() {
     select.addEventListener("change", (event) => applyLanguage(event.target.value));
   });
 
+  const searchInput = $("#search-input");
+  if (searchInput) {
+    const clearBtn = $("#search-clear");
+    const syncClear = () => {
+      if (clearBtn) clearBtn.hidden = !searchInput.value;
+    };
+    searchInput.addEventListener("input", () => {
+      state.query = searchInput.value;
+      syncClear();
+      if ($("#view-home").hidden) show("home");
+      renderHome();
+    });
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      resetSearch();
+      renderHome();
+    });
+    clearBtn?.addEventListener("click", () => {
+      resetSearch();
+      renderHome();
+      searchInput.focus();
+    });
+  }
+
   $("#add-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    addRecipe({ url: $("#add-url").value.trim(), caption: $("#add-caption").value.trim() });
+    addRecipe({ url: $("#add-url").value.trim() });
   });
 
   $("#talk-btn").addEventListener("click", openAgentFromTop);

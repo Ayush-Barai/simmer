@@ -6,7 +6,8 @@ Built for the **Hacktoberfest Open-Source AI Challenge (Week 2: Side Hustle)**.
 
 ## What it does
 
-- **Link → recipe:** share a Reel/Short/TikTok or paste a link or caption; Gemma extracts
+- **Link → recipe:** share a Reel/Short/TikTok or paste a link. Simmer reads the
+  description first, then transcribes the audio if the text has no recipe; Gemma extracts
   ingredients, amounts, timings and ordered steps.
 - **Hands-free cooking:** a live voice loop (ElevenLabs Conversational AI) with a browser
   speech fallback, so you can ask questions mid-step without touching the phone.
@@ -19,7 +20,8 @@ Built for the **Hacktoberfest Open-Source AI Challenge (Week 2: Side Hustle)**.
 
 - **Gemma 4** (open-weight) turns messy captions/subtitles into structured recipes, powers the cook-buddy chat, and translates recipes into other languages.
 - **MongoDB Atlas** stores your saved recipes (falls back to in-memory when no URI is set).
-- **ElevenLabs** gives the cook-buddy a natural voice (falls back to the browser voice).
+- **ElevenLabs** gives the cook-buddy a natural voice and transcribes reel audio (Scribe)
+  when a post has no readable recipe text.
 - **Clerk** handles sign-in so each cook only sees their own cookbook.
 - **Sentry** traces the ingest and chat agent runs.
 - **Render** hosts it (Docker); an optional **.tech** domain gives it a custom address.
@@ -62,7 +64,7 @@ GEMMA_MODEL=gemma-4-26b-a4b-it
 ```bash
 npm run dev
 ```
-Open http://localhost:3000. Paste a recipe link, or paste a caption, and press
+Open http://localhost:3000. Paste a recipe link and press
 **Turn it into a recipe**. Everything works with only `GEMMA_API_KEY` set
 (recipes are stored in memory until you connect Atlas).
 
@@ -105,6 +107,8 @@ that survives restarts.
 | `ELEVENLABS_API_KEY` | No | Natural voice (else browser voice) |
 | `ELEVENLABS_VOICE_ID` | No | Voice to use (free plans need an account voice; blank = auto-pick) |
 | `ELEVENLABS_AGENT_ID` | No | Conversational AI agent for the live hands-free agent (needs a key with Conversational AI permission) |
+| `ELEVENLABS_STT_MODEL` | No | Speech-to-text model for audio fallback, default `scribe_v1` |
+| `YTDLP_COOKIES` | No | Path to a cookies file, for Instagram/TikTok posts that require login |
 | `CLERK_PUBLISHABLE_KEY` | No | Enables sign-in in the browser (safe to expose) |
 | `CLERK_SECRET_KEY` | No | Verifies session tokens on the server (never expose) |
 | `YT_SUB_LANGS` | No | YouTube subtitle languages to prefer, default `en.*,en` |
@@ -147,7 +151,8 @@ only the last two commands (`git remote add ...` and `git push ...`).
    - `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID` (live voice agent; voice falls back to
      the browser without them)
    - `SENTRY_DSN` (optional)
-5. Deploy. The first Docker build takes a few minutes because it installs `yt-dlp`.
+5. Deploy. The first Docker build takes a few minutes because it installs `yt-dlp` and
+   `ffmpeg` (for audio transcription and format conversion).
 6. Open the service URL. `/api/health` should return `{ "ok": true, ... }`.
 
 Manual alternative: **New → Web Service** → pick the repo → **Language: Docker** →
@@ -245,10 +250,10 @@ What works from a bare shared link:
 
 - **YouTube Shorts / YouTube:** works when the video has captions (yt-dlp) or a written
   description — this is the best case.
-- **Instagram Reels / TikTok:** bot-walled, so the **link alone usually returns nothing**.
-  Use **Copy caption**, then share/paste the caption into Simmer — that always works.
-  If a share carries the caption in the text, Simmer pulls the link out of the text
-  automatically.
+- **Instagram Reels / TikTok:** bot-walled, so the **link alone often returns nothing**.
+  Simmer still tries the page's caption metadata, then yt-dlp, then **transcribes the
+  audio** with ElevenLabs Scribe. Posts that need a login can use an optional
+  `YTDLP_COOKIES` file.
 
 ## Sign in with Clerk (private cookbook per person)
 
@@ -283,8 +288,8 @@ Details:
 
 ## Notes
 
-- The share button works on Android Chrome. On iPhone, paste the link + caption.
-- Private/walled reels: paste the caption and Simmer still builds the recipe.
+- The share button works on Android Chrome. On iPhone, paste the link.
+- Private/walled posts often block link reading; public recipe links work best.
 - Recipes are cached on the device, so cook mode keeps working with no signal.
 
 ## Hands-free cook mode
@@ -348,11 +353,12 @@ Simmer fetches the readable text behind a link before asking Gemma to structure 
 - **YouTube / Shorts:** Simmer downloads the video's **subtitles** (auto-generated
   captions included) with **yt-dlp** and turns the spoken recipe into steps, and also
   reads the description. This is what makes "cook along with this Short" work.
-  If a video has no captions and no description text, Simmer asks you to paste it.
-- **TikTok / Instagram:** bot-walled, so the link alone usually yields nothing —
-  paste the caption and Simmer will build the recipe from it.
-
-Adding a pasted caption always works, even when the link cannot be read.
+  If a video has no captions and no description text, Simmer downloads the audio and
+  transcribes it with **ElevenLabs Scribe** (needs `ELEVENLABS_API_KEY`; `ffmpeg` improves
+  format support and is installed in the Docker image).
+- **TikTok / Instagram:** bot-walled, so the link alone usually yields nothing. Simmer
+  reads the caption from the page metadata when it can, then falls back to the audio
+  transcript. A cookies file (`YTDLP_COOKIES`) helps with posts that require a login.
 
 ### YouTube subtitles need `yt-dlp` (recommended)
 

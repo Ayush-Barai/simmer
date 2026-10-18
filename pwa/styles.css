@@ -86,7 +86,7 @@ a { color: var(--brand); }
 
 .topbar {
   position: sticky; top: 0; z-index: 10;
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; row-gap: 0.55rem;
   padding: 0.75rem 1rem;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: saturate(1.4) blur(10px);
@@ -99,6 +99,31 @@ a { color: var(--brand); }
 }
 .brand-mark { font-size: 1.3rem; }
 .topbar-actions { display: flex; align-items: center; gap: 0.5rem; }
+.search-row { flex: 1 1 100%; min-width: 0; }
+.searchbar {
+  width: 100%; max-width: var(--maxw); margin-inline: auto;
+  display: flex; align-items: center; gap: 0.5rem; min-width: 0;
+  padding: 0.45rem 0.8rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.searchbar:focus-within {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 18%, transparent);
+}
+.search-icon { font-size: 0.95rem; line-height: 1; opacity: 0.7; }
+.searchbar input {
+  flex: 1; min-width: 0; padding: 0.2rem 0; border: 0; background: transparent;
+  color: var(--text); font: inherit; outline: none;
+}
+.searchbar input::placeholder { color: var(--muted); }
+.searchbar input[type="search"]::-webkit-search-cancel-button { display: none; }
+.search-clear {
+  border: 0; background: transparent; color: var(--muted); cursor: pointer;
+  font: inherit; line-height: 1; padding: 0.1rem 0.2rem;
+}
+.search-clear:hover { color: var(--text); }
+.search-empty { text-align: center; color: var(--muted); padding: 2rem 0 0.5rem; }
 .btn-live {
   display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;
   background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 60%, #ffd0a8));
