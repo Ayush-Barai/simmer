@@ -4,6 +4,17 @@ Share a cooking reel → get a clean recipe → cook hands-free with an open-AI 
 
 Built for the **Hacktoberfest Open-Source AI Challenge (Week 2: Side Hustle)**.
 
+## What it does
+
+- **Link → recipe:** share a Reel/Short/TikTok or paste a link or caption; Gemma extracts
+  ingredients, amounts, timings and ordered steps.
+- **Hands-free cooking:** a live voice loop (ElevenLabs Conversational AI) with a browser
+  speech fallback, so you can ask questions mid-step without touching the phone.
+- **10 languages:** read, chat and translate in English, Spanish, French, German, Italian,
+  Portuguese, Hindi, Japanese, Chinese and Arabic.
+- **Private cookbook:** Clerk auth, per-user recipes, thumbnails and saved chat history.
+- **Installable PWA:** Android share target, offline shell and a light/dark theme.
+
 ## Stack
 
 - **Gemma 4** (open-weight) turns messy captions/subtitles into structured recipes, powers the cook-buddy chat, and translates recipes into other languages.
@@ -11,7 +22,7 @@ Built for the **Hacktoberfest Open-Source AI Challenge (Week 2: Side Hustle)**.
 - **ElevenLabs** gives the cook-buddy a natural voice (falls back to the browser voice).
 - **Clerk** handles sign-in so each cook only sees their own cookbook.
 - **Sentry** traces the ingest and chat agent runs.
-- **Render** hosts it; a **.tech** domain points at it.
+- **Render** hosts it (Docker); an optional **.tech** domain gives it a custom address.
 
 ---
 
@@ -96,29 +107,21 @@ that survives restarts.
 | `ELEVENLABS_AGENT_ID` | No | Conversational AI agent for the live hands-free agent (needs a key with Conversational AI permission) |
 | `CLERK_PUBLISHABLE_KEY` | No | Enables sign-in in the browser (safe to expose) |
 | `CLERK_SECRET_KEY` | No | Verifies session tokens on the server (never expose) |
+| `YT_SUB_LANGS` | No | YouTube subtitle languages to prefer, default `en.*,en` |
 | `SENTRY_DSN` | No | Enables agent tracing |
-| `PORT` | No | Default `3000` |
+| `PORT` | No | Default `3000`; Render sets it automatically |
 
 ---
 
 ## Deploy on Render
 
-This repo ships with `render.yaml` (Docker, free plan, `/api/health` health check) and a
-`.dockerignore` so `.env` never enters the image.
+`render.yaml` describes a Docker web service named `simmer` on the free plan, with the
+health check at `/api/health`. `.dockerignore` keeps `.env` and `node_modules` out of the
+image.
 
-1. Push the project to GitHub (commands below).
-2. In Render, choose **New → Blueprint**, connect the repo, and apply. Render reads
-   `render.yaml` and creates the `simmer` web service.
-3. Enter the secret values when Render asks: `GEMMA_API_KEY`, `MONGODB_URI`,
-   `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID`, `CLERK_PUBLISHABLE_KEY`,
-   `CLERK_SECRET_KEY`, and `SENTRY_DSN` if you use it.
-4. Wait for the Docker build. The service is live when `/api/health` returns
-   `{ "ok": true }`.
-5. Atlas: allow `0.0.0.0/0` in **Network Access** (Render IPs rotate). Clerk: add the
-   Render URL in the Clerk dashboard (Domains / Allowed origins) and use the keys for
-   that instance.
-6. Optional: run `npm run init-db` once from your machine against the same Atlas URI to
-   create the indexes.
+### 1. Push to GitHub
+
+Create an **empty** repo at https://github.com/new (no README, no `.gitignore`), then:
 
 ```bash
 git init -b main
@@ -127,6 +130,40 @@ git commit -m "Simmer: AI recipe PWA"
 git remote add origin https://github.com/<you>/simmer.git
 git push -u origin main
 ```
+
+`.env` is ignored already — never commit it.
+
+### 2. Create the Render service
+
+1. In Render, choose **New → Blueprint**.
+2. Connect GitHub, pick the `simmer` repo and grant access if asked.
+3. Click **Apply**. Render reads `render.yaml` and creates the web service.
+4. Fill the secrets Render prompts for:
+   - `GEMMA_API_KEY` (required)
+   - `MONGODB_URI` (recommended; otherwise recipes are in-memory)
+   - `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` (sign-in and private cookbooks)
+   - `ELEVENLABS_API_KEY`, `ELEVENLABS_AGENT_ID` (live voice agent; voice falls back to
+     the browser without them)
+   - `SENTRY_DSN` (optional)
+5. Deploy. The first Docker build takes a few minutes because it installs `yt-dlp`.
+6. Open the service URL. `/api/health` should return `{ "ok": true, ... }`.
+
+Manual alternative: **New → Web Service** → pick the repo → **Language: Docker** →
+health check path `/api/health` → add the same environment variables.
+
+### 3. Connect the rest
+
+- **MongoDB Atlas:** allow `0.0.0.0/0` in **Network Access** (Render IPs rotate). Run
+  `npm run init-db` once from your machine with the same `MONGODB_URI` to create indexes.
+- **Clerk:** test keys (`pk_test_...`) work on the Render URL. For production keys, add
+  the Render hostname under **Domains** in the Clerk dashboard.
+- **Custom `.tech` domain:** Render → **Settings → Custom Domains** → add the domain, then
+  create the DNS records Render shows. HTTPS is automatic.
+- **PWA / share target:** open the Render URL on Android Chrome and install it. The share
+  sheet needs HTTPS, which Render provides.
+
+> Render's free plan sleeps after ~15 minutes idle. The first request afterwards takes
+> roughly 30–60 seconds; recipes stay safe in Atlas.
 
 ---
 
@@ -139,6 +176,7 @@ git push -u origin main
 | `npm run models` | List the Gemma models your API key can use |
 | `npm run check-db` | Test the MongoDB connection and explain any problem |
 | `npm run init-db` | Create the `recipes` collection, schema validator and indexes |
+| `npm run claim` | Attach existing unowned recipes to your Clerk user (and backfill thumbnails) |
 
 ---
 
@@ -182,8 +220,12 @@ The app keeps working on the in-memory store until this is fixed.
 - `DELETE /api/recipes/:id`
 - `POST /api/chat` `{ recipeId, message, history, language }`
 - `POST /api/translate` `{ recipeId, language }`
+- `GET /api/agent/session?recipeId=...&language=en&resume=1` (ElevenLabs live agent)
 - `POST /api/tts` `{ text, language }`
 - `GET /api/health`
+
+When Clerk is configured, every route except `/api/health` requires
+`Authorization: Bearer <Clerk session token>`.
 
 ## Use it on your phone (share straight from a reel)
 
@@ -229,6 +271,8 @@ Details:
   the database.
 - Leave both keys blank and Simmer stays in **guest mode** (no login, no isolation) so
   local demos still work.
+- If you saved recipes before enabling Clerk, sign up once and run `npm run claim` to
+  attach those unowned recipes to your account (it also backfills thumbnails).
 - Recipe thumbnails come from YouTube's video preview or the page's `og:image`, and
   are shown on the home screen.
 - Light and dark themes are available everywhere via the header toggle. The choice is
