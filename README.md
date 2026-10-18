@@ -131,7 +131,9 @@ git remote add origin https://github.com/<you>/simmer.git
 git push -u origin main
 ```
 
-`.env` is ignored already — never commit it.
+`.env` is ignored already — never commit it. If you are pushing this folder as-is, it
+already has a `main` branch and initial commit: create the empty GitHub repo, then run
+only the last two commands (`git remote add ...` and `git push ...`).
 
 ### 2. Create the Render service
 
