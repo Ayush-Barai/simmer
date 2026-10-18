@@ -1,0 +1,25 @@
+{
+  "name": "simmer",
+  "version": "1.0.0",
+  "description": "Share a cooking reel, get a clean recipe, and cook hands-free with an open-AI buddy.",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "models": "node scripts/list-models.js",
+    "check-db": "node scripts/check-db.js",
+    "init-db": "node scripts/init-db.js",
+    "claim": "node scripts/claim-recipes.js"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.25.0",
+    "@sentry/node": "^8.30.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.8.0",
+    "youtubei.js": "^18.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

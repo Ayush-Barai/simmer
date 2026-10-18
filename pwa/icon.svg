@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Simmer">
+  <rect width="512" height="512" rx="112" fill="#e8590c"/>
+  <path d="M150 210h212a24 24 0 0 1 24 24v100a92 92 0 0 1-92 92h-76a92 92 0 0 1-92-92V234a24 24 0 0 1 24-24z" fill="#fff8f1"/>
+  <rect x="126" y="246" width="34" height="26" rx="13" fill="#fff8f1"/>
+  <rect x="352" y="246" width="34" height="26" rx="13" fill="#fff8f1"/>
+  <path d="M256 96c34 46-6 60 6 96 20-14 22-38 22-38 26 30 18 68-28 68-46 0-56-42-30-72 8 12 14 20 16 30 12-24 12-52 14-84z" fill="#e8590c"/>
+  <path d="M200 300a18 18 0 0 1 18 18c0 22 14 34 38 34a18 18 0 0 1 0 36c-46 0-74-28-74-70a18 18 0 0 1 18-18z" fill="#e8590c" opacity=".55"/>
+</svg>

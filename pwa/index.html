@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" id="theme-color" content="#e8590c" />
+  <meta name="description" content="Share a cooking reel, get a clean recipe, and cook hands-free with an open-AI buddy." />
+  <title>Simmer</title>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem("simmer:theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <!-- LANDING -->
+  <div id="landing" class="landing" hidden>
+    <div class="landing-bg" aria-hidden="true">
+      <span class="blob blob-a"></span>
+      <span class="blob blob-b"></span>
+      <span class="blob blob-c"></span>
+    </div>
+
+    <nav class="landing-nav wrap">
+      <a class="landing-brand" href="#top" aria-label="Simmer">
+        <span class="brand-mark" aria-hidden="true">🔥</span>
+        <span>Simmer</span>
+      </a>
+      <div class="landing-nav-actions">
+        <a class="landing-link" href="#how">How it works</a>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch theme" title="Switch theme">
+          <span class="theme-icon" aria-hidden="true">🌙</span>
+        </button>
+        <button type="button" class="btn btn-ghost btn-small" data-signin>Sign in</button>
+        <button type="button" class="btn btn-primary btn-small" data-signup>Sign up</button>
+      </div>
+    </nav>
+
+    <header id="top" class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>Your AI sous-chef</p>
+        <h1 class="hero-title">
+          Turn a cooking reel into a recipe you can
+          <span class="marker">actually cook</span>.
+        </h1>
+        <p class="hero-sub">
+          Share a reel or paste a link. Simmer reads the caption, writes clean steps with real
+          amounts, then talks you through dinner — hands-free, in 10 languages.
+        </p>
+        <div class="hero-cta">
+          <button type="button" class="btn btn-primary btn-lg" data-signup>Start cooking free</button>
+          <a class="btn btn-ghost btn-lg" href="#how">See how it works</a>
+        </div>
+        <p class="hero-note">
+          No app store. No typing with wet hands. Already have an account?
+          <button type="button" class="linklike" data-signin>Sign in</button>
+        </p>
+        <p id="landing-error" class="status error" hidden></p>
+      </div>
+
+      <div class="hero-art" aria-hidden="true">
+        <div class="phone">
+          <span class="phone-notch"></span>
+          <div class="reel">
+            <div class="reel-top">
+              <span class="reel-avatar"></span>
+              <span class="reel-lines"><i></i><i></i></span>
+            </div>
+            <span class="reel-food">🍝</span>
+            <span class="reel-play">▶</span>
+            <div class="reel-caption"><i></i><i></i><i></i></div>
+            <div class="reel-actions"><span>♥</span><span>💬</span><span>↗</span></div>
+          </div>
+        </div>
+
+        <span class="magic-arrow">→</span>
+
+        <div class="recipe-mock">
+          <div class="mock-image">
+            <span class="steam s1"></span>
+            <span class="steam s2"></span>
+            <span class="steam s3"></span>
+            <span class="mock-dish">🍲</span>
+          </div>
+          <p class="mock-title">Garlic Butter Pasta</p>
+          <ul class="mock-list">
+            <li><b>200 g</b> pasta</li>
+            <li><b>4 cloves</b> garlic</li>
+            <li><b>2 tbsp</b> butter</li>
+          </ul>
+          <ol class="mock-steps">
+            <li>Boil the pasta until al dente.</li>
+            <li>Sizzle the garlic in butter.</li>
+            <li>Toss together and serve.</li>
+          </ol>
+          <div class="mock-voice">
+            <span class="wave"><i></i><i></i><i></i><i></i></span>
+            <span class="voice-lines">
+              <span>“Add the garlic now.”</span>
+              <span>“Lower the heat a little.”</span>
+              <span>“Two minutes to go.”</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <section class="strip" aria-label="Works with">
+      <div class="marquee">
+        <div class="marquee-track">
+          <span>▶ YouTube Shorts</span><span>◎ Instagram Reels</span><span>♪ TikTok</span>
+          <span>✎ Recipe blogs</span><span>🌍 10 languages</span><span>🎙️ Live voice</span>
+          <span>▶ YouTube Shorts</span><span>◎ Instagram Reels</span><span>♪ TikTok</span>
+          <span>✎ Recipe blogs</span><span>🌍 10 languages</span><span>🎙️ Live voice</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="section wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 class="section-title">Three taps from scroll to supper.</h2>
+      <div class="steps-grid">
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">📲</span>
+          <h3>1. Share the reel</h3>
+          <p>Send Simmer a Short, Reel, TikTok or recipe link. Private post? Paste the caption too.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">✨</span>
+          <h3>2. Get a real recipe</h3>
+          <p>Gemma keeps the heat, timing and quantities, then writes one clear step per action.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">🎧</span>
+          <h3>3. Cook hands-free</h3>
+          <p>Tap the mic and talk while you cook. Ask “how much salt?” and Simmer answers out loud.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section wrap">
+      <p class="eyebrow">Built for the messy parts</p>
+      <h2 class="section-title">Everything between “save” and “serve”.</h2>
+      <div class="feature-grid">
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">🔗</span>
+          <h3>From any link</h3>
+          <p>Shorts, Reels, TikToks and recipe blogs. If a post is walled, paste its caption.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">📏</span>
+          <h3>Amounts that stay</h3>
+          <p>Heat, timing and quantities are preserved — no more guessing what “a splash” means.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">🎙️</span>
+          <h3>A voice that answers</h3>
+          <p>Ask questions mid-simmer and get spoken answers without touching your phone.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">🌍</span>
+          <h3>Ten languages</h3>
+          <p>Read the recipe — and talk to Simmer — in the language you actually cook in.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">🔒</span>
+          <h3>Your own cookbook</h3>
+          <p>Sign in and your saved recipes and cooking chats stay private to your account.</p>
+        </article>
+        <article class="feature reveal">
+          <span class="feature-icon" aria-hidden="true">📴</span>
+          <h3>Install it</h3>
+          <p>Add Simmer to your home screen. It opens like an app and keeps your recipes close.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section wrap lang-section">
+      <p class="eyebrow">Speak your kitchen</p>
+      <h2 class="section-title">Cook in the language you think in.</h2>
+      <div class="lang-chips">
+        <span>English</span><span>Español</span><span>Français</span><span>Deutsch</span>
+        <span>Italiano</span><span>Português</span><span>हिन्दी</span><span>日本語</span>
+        <span>中文</span><span>العربية</span>
+      </div>
+    </section>
+
+    <section class="final-cta wrap">
+      <div class="cta-card reveal">
+        <div class="cta-orb" aria-hidden="true">🔥</div>
+        <h2>Dinner is one share away.</h2>
+        <p>Save the recipes you scroll past. Cook them tonight.</p>
+        <button type="button" class="btn btn-primary btn-lg" data-signup>Get started free</button>
+      </div>
+    </section>
+
+    <footer class="landing-footer wrap">
+      <span class="landing-brand"><span class="brand-mark" aria-hidden="true">🔥</span> Simmer</span>
+      <span class="muted">Built with Gemma · ElevenLabs · MongoDB · Clerk · Sentry</span>
+    </footer>
+  </div>
+
+  <header class="topbar">
+    <button class="brand" data-nav="home" aria-label="Go to your cookbook">
+      <span class="brand-mark" aria-hidden="true">🔥</span>
+      <span class="brand-name">Simmer</span>
+    </button>
+    <div class="topbar-actions">
+      <button class="btn btn-live btn-small" id="talk-btn" aria-label="Talk to Simmer" hidden>
+        <span class="live-dot" aria-hidden="true"></span>Ask Simmer
+      </button>
+      <button class="btn btn-primary btn-small" data-nav="add">Add recipe</button>
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch theme" title="Switch theme">
+        <span class="theme-icon" aria-hidden="true">🌙</span>
+      </button>
+      <button class="btn btn-ghost btn-small" id="signin-btn" hidden>Sign in</button>
+
+      <div class="account-wrap" id="account-wrap" hidden>
+        <button
+          class="account-chip"
+          id="account-chip"
+          aria-label="Open your profile"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <img id="account-avatar" alt="" hidden />
+          <span id="account-initial">S</span>
+        </button>
+
+        <div id="profile-menu" class="profile-menu" role="dialog" aria-label="Your profile" hidden>
+          <div class="profile-top">
+            <span class="profile-avatar-wrap">
+              <img id="profile-avatar" alt="" hidden />
+              <span id="profile-initial">S</span>
+            </span>
+            <div class="profile-id">
+              <p id="profile-name" class="profile-name"></p>
+              <p id="profile-email" class="profile-email"></p>
+            </div>
+          </div>
+
+          <dl class="profile-stats">
+            <div><dt>Recipes</dt><dd id="profile-recipes">0</dd></div>
+            <div><dt>Joined</dt><dd id="profile-joined">—</dd></div>
+          </dl>
+
+          <div class="profile-actions">
+            <button type="button" class="btn btn-ghost btn-small" id="profile-manage">Manage account</button>
+            <button type="button" class="btn btn-danger btn-small" id="profile-signout">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HOME -->
+    <section id="view-home" class="view" aria-labelledby="home-title">
+      <h1 id="home-title" class="sr-only">Your cookbook</h1>
+      <div id="home-empty" class="empty" hidden>
+        <p class="empty-emoji" aria-hidden="true">🍳</p>
+        <h2>No recipes yet</h2>
+        <p class="muted">Share a cooking reel into Simmer, or paste a link and we'll save the recipe here.</p>
+        <button class="btn btn-primary" data-nav="add">Add your first recipe</button>
+      </div>
+      <ul id="recipe-list" class="cards"></ul>
+    </section>
+
+    <!-- ADD -->
+    <section id="view-add" class="view" aria-labelledby="add-title" hidden>
+      <h1 id="add-title">Add a recipe</h1>
+      <p class="muted">Paste a link. If the reel is private, paste the caption too and Simmer will do the rest.</p>
+      <form id="add-form" class="form">
+        <label for="add-url">Recipe link</label>
+        <input id="add-url" name="url" type="url" inputmode="url" placeholder="https://youtube.com/shorts/..." autocomplete="off" />
+
+        <label for="add-caption">Caption or recipe text <span class="muted">(optional)</span></label>
+        <textarea id="add-caption" name="caption" rows="6" placeholder="Paste the caption, ingredients or steps from the post..."></textarea>
+
+        <button type="submit" class="btn btn-primary" id="add-submit">Turn it into a recipe</button>
+        <p id="add-status" class="status" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- DETAIL -->
+    <section id="view-detail" class="view" aria-labelledby="detail-title" hidden>
+      <button class="btn btn-ghost btn-small" data-nav="home">← Cookbook</button>
+      <h1 id="detail-title"></h1>
+      <p id="detail-meta" class="muted"></p>
+      <ul id="detail-tags" class="tags"></ul>
+
+      <div class="lang-row">
+        <label for="detail-lang">Language</label>
+        <select id="detail-lang" class="lang-select" aria-label="Recipe language"></select>
+        <span id="lang-status" class="muted" role="status" aria-live="polite"></span>
+      </div>
+
+      <h2>Ingredients</h2>
+      <ul id="detail-ingredients" class="ingredients"></ul>
+
+      <h2>Steps</h2>
+      <ol id="detail-steps" class="steps"></ol>
+
+      <div class="detail-actions">
+        <button class="btn btn-primary" id="start-cooking">Start cooking</button>
+        <a id="detail-source" class="btn btn-ghost btn-small" target="_blank" rel="noopener" hidden>Open original</a>
+        <button class="btn btn-danger btn-small" id="delete-recipe">Delete</button>
+      </div>
+    </section>
+
+    <!-- COOK -->
+    <section id="view-cook" class="view view-cook" aria-labelledby="cook-title" hidden>
+      <button class="btn btn-ghost btn-small" id="cook-back">← Back to recipe</button>
+      <p id="cook-title" class="cook-title"></p>
+
+      <div class="lang-row">
+        <label for="cook-lang">Language</label>
+        <select id="cook-lang" class="lang-select" aria-label="Speaking language"></select>
+      </div>
+
+      <div class="cook-step">
+        <span id="cook-progress" class="muted"></span>
+        <p id="cook-step-text" class="cook-step-text"></p>
+      </div>
+
+      <div class="cook-controls">
+        <button class="btn btn-ghost" id="step-prev">Previous</button>
+        <button class="btn btn-primary" id="step-speak">Read</button>
+        <button class="btn btn-ghost" id="step-next">Next</button>
+      </div>
+
+      <div class="ask">
+        <div class="ask-head">
+          <h2 class="ask-title">Ask Simmer</h2>
+          <button type="button" class="btn btn-ghost btn-small" id="history-btn">View chat history</button>
+        </div>
+        <div id="chat-log" class="chat-log" aria-live="polite"></div>
+        <form id="ask-form" class="ask-form">
+          <input id="ask-input" type="text" placeholder="How much sugar?" autocomplete="off" aria-label="Ask Simmer a question" />
+          <button type="button" class="btn btn-mic" id="mic-btn" aria-label="Talk to Simmer live" aria-pressed="false" hidden>🎤</button>
+          <button type="submit" class="btn btn-primary">Ask</button>
+        </form>
+        <p id="voice-hint" class="voice-hint muted" hidden>Tap the mic to talk hands-free. Say "stop" to end.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- LIVE AGENT -->
+  <div id="agent-overlay" class="overlay" hidden>
+    <div class="overlay-card">
+      <div class="overlay-head">
+        <span class="live-badge"><span class="live-dot" aria-hidden="true"></span>Live agent</span>
+        <span id="agent-timer" class="muted"></span>
+      </div>
+      <p id="agent-recipe" class="agent-recipe muted"></p>
+
+      <div id="agent-orb" class="agent-orb" data-state="connecting">
+        <span></span><span></span><span></span>
+        <i class="agent-orb-core" aria-hidden="true">🔥</i>
+      </div>
+      <p id="agent-status" class="agent-status" role="status" aria-live="polite">Connecting…</p>
+
+      <div id="agent-transcript" class="transcript" aria-live="polite"></div>
+
+      <div class="overlay-actions">
+        <button type="button" class="btn btn-ghost" id="agent-mute" aria-pressed="false">Mute</button>
+        <button type="button" class="btn btn-danger" id="agent-end">End</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT HISTORY -->
+  <div id="history-overlay" class="overlay" hidden>
+    <div class="overlay-card">
+      <div class="overlay-head">
+        <h2 class="ask-title">Chat history</h2>
+        <button type="button" class="btn btn-ghost btn-small" id="history-close">Close</button>
+      </div>
+      <div id="history-log" class="transcript"></div>
+      <div class="overlay-actions">
+        <button type="button" class="btn btn-ghost btn-small" id="history-clear">Clear history</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span class="muted">Built with open AI (Gemma) · <a href="https://hacktoberfest.com" target="_blank" rel="noopener">Hacktoberfest 2026</a> · <span id="app-version">v8</span></span>
+  </footer>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
