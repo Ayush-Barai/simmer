@@ -71,6 +71,12 @@
       border-right-color: rgba(232, 89, 12, 0.22);
       animation: boot-spin 0.95s linear infinite;
     }
+    .boot-mark img {
+      width: 60px;
+      height: 60px;
+      border-radius: 13px;
+      display: block;
+    }
     html[data-theme="dark"] .boot-mark::before {
       border-top-color: #ff7a33;
       border-right-color: rgba(255, 122, 51, 0.22);
@@ -121,13 +127,14 @@
   </style>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="icon" href="/icons/icon-192.png" sizes="192x192" type="image/png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body aria-busy="true">
   <div id="boot" role="status" aria-live="polite" aria-label="Loading Simmer">
     <div class="boot-inner">
-      <div class="boot-mark" aria-hidden="true">🔥</div>
+      <div class="boot-mark" aria-hidden="true"><img src="/icon.svg" alt="" /></div>
       <p class="boot-title">Simmer</p>
       <p class="boot-sub">
         Getting the kitchen ready<span class="boot-dots" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -145,7 +152,7 @@
 
     <nav class="landing-nav wrap">
       <a class="landing-brand" href="#top" aria-label="Simmer">
-        <span class="brand-mark" aria-hidden="true">🔥</span>
+        <span class="brand-mark" aria-hidden="true"><img src="/icon.svg" alt="" /></span>
         <span>Simmer</span>
       </a>
       <div class="landing-nav-actions">
@@ -166,8 +173,8 @@
           <span class="marker">actually cook</span>.
         </h1>
         <p class="hero-sub">
-          Share a reel or paste a link. Simmer reads the post, writes clean steps with real
-          amounts, then talks you through dinner — hands-free, in 10 languages.
+          Share a reel, paste a link, or paste a recipe you already have. Simmer writes clean
+          steps with real amounts, then talks you through dinner — hands-free, in 10 languages.
         </p>
         <div class="hero-cta">
           <button type="button" class="btn btn-primary btn-lg" data-signup>Start cooking free</button>
@@ -244,8 +251,8 @@
       <div class="steps-grid">
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">📲</span>
-          <h3>1. Share the reel</h3>
-          <p>Send Simmer a Short, Reel, TikTok or recipe link and it pulls out the recipe.</p>
+          <h3>1. Share or paste</h3>
+          <p>Send Simmer a Short, Reel, TikTok, recipe link or your own recipe text and it pulls out the recipe.</p>
         </article>
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">✨</span>
@@ -266,8 +273,8 @@
       <div class="feature-grid">
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">🔗</span>
-          <h3>From any link</h3>
-          <p>Shorts, Reels, TikToks and recipe blogs, all turned into one clean cookbook.</p>
+          <h3>From links or notes</h3>
+          <p>Shorts, Reels, TikToks, recipe blogs and your own notes, all turned into one clean cookbook.</p>
         </article>
         <article class="feature reveal">
           <span class="feature-icon" aria-hidden="true">📏</span>
@@ -317,14 +324,14 @@
     </section>
 
     <footer class="landing-footer wrap">
-      <span class="landing-brand"><span class="brand-mark" aria-hidden="true">🔥</span> Simmer</span>
+      <span class="landing-brand"><span class="brand-mark" aria-hidden="true"><img src="/icon.svg" alt="" /></span> Simmer</span>
       <span class="muted">Built with Gemma · ElevenLabs · MongoDB · Clerk · Sentry</span>
     </footer>
   </div>
 
   <header class="topbar">
     <button class="brand" data-nav="home" aria-label="Go to your cookbook">
-      <span class="brand-mark" aria-hidden="true">🔥</span>
+      <span class="brand-mark" aria-hidden="true"><img src="/icon.svg" alt="" /></span>
       <span class="brand-name">Simmer</span>
     </button>
     <div class="topbar-actions">
@@ -407,10 +414,28 @@
     <!-- ADD -->
     <section id="view-add" class="view" aria-labelledby="add-title" hidden>
       <h1 id="add-title">Add a recipe</h1>
-      <p class="muted">Paste a link and Simmer will pull out the ingredients and steps.</p>
+      <p id="add-hint" class="muted">Add a link and Simmer will pull out the ingredients and steps.</p>
+
+      <div class="add-modes" role="group" aria-label="How are you adding this recipe?">
+        <button type="button" class="add-mode is-active" data-add-mode="link" aria-pressed="true">Link</button>
+        <button type="button" class="add-mode" data-add-mode="text" aria-pressed="false">Description</button>
+      </div>
+
       <form id="add-form" class="form">
-        <label for="add-url">Recipe link</label>
-        <input id="add-url" name="url" type="url" inputmode="url" placeholder="https://youtube.com/shorts/..." autocomplete="off" />
+        <div id="add-link-fields">
+          <label for="add-url">Recipe link</label>
+          <input id="add-url" name="url" type="url" inputmode="url" placeholder="https://youtube.com/shorts/..." autocomplete="off" />
+        </div>
+
+        <div id="add-text-fields" hidden>
+          <label for="add-description">Your recipe</label>
+          <textarea
+            id="add-description"
+            name="description"
+            rows="9"
+            placeholder="Paste the recipe exactly as you have it — ingredients, steps, notes, family tweaks..."
+          ></textarea>
+        </div>
 
         <button type="submit" class="btn btn-primary" id="add-submit">Turn it into a recipe</button>
         <p id="add-status" class="status" role="status" aria-live="polite"></p>
@@ -435,6 +460,11 @@
 
       <h2>Steps</h2>
       <ol id="detail-steps" class="steps"></ol>
+
+      <details id="detail-original" class="original" hidden>
+        <summary>Your original description</summary>
+        <p id="detail-original-text" class="original-text"></p>
+      </details>
 
       <div class="detail-actions">
         <button class="btn btn-primary" id="start-cooking">Start cooking</button>

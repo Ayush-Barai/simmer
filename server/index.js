@@ -7,7 +7,7 @@ import { initSentry, Sentry } from "./sentry.js";
 import { ingestRecipe } from "./ingest.js";
 import { cookBuddyReply, streamCookBuddyReply } from "./chat.js";
 import { synthesize } from "./voice.js";
-import { translateRecipe } from "./translate.js";
+import { ensureTranslation, prefetchTranslations } from "./localize.js";
 import { agentEnabled, createSession } from "./agent.js";
 import { authEnabled, publishableKey, requireAuth } from "./auth.js";
 import {
@@ -17,7 +17,6 @@ import {
   listRecipes,
   getRecipe,
   deleteRecipe,
-  saveTranslation,
 } from "./db.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -41,7 +40,7 @@ app.get("/api/health", (_req, res) => {
 app.post("/api/ingest", requireAuth, async (req, res) => {
   const { url = "", caption = "" } = req.body || {};
   if (!url && !caption) {
-    return res.status(400).json({ error: "Add a recipe link." });
+    return res.status(400).json({ error: "Add a recipe link or description." });
   }
   try {
     const recipe = await Sentry.startSpan(
@@ -50,6 +49,7 @@ app.post("/api/ingest", requireAuth, async (req, res) => {
     );
     const id = await saveRecipe(recipe, req.userId);
     res.json({ ...recipe, _id: id });
+    void prefetchTranslations(recipe, id, req.userId);
   } catch (err) {
     const status = err.code ? 422 : 500;
     res.status(status).json({ error: err.message });
@@ -64,6 +64,7 @@ app.get("/api/recipes/:id", requireAuth, async (req, res) => {
   const recipe = await getRecipe(req.params.id, req.userId);
   if (!recipe) return res.status(404).json({ error: "Recipe not found" });
   res.json(recipe);
+  void prefetchTranslations(recipe, recipe._id, req.userId);
 });
 
 app.delete("/api/recipes/:id", requireAuth, async (req, res) => {
@@ -119,9 +120,8 @@ app.post("/api/translate", requireAuth, async (req, res) => {
   try {
     const translated = await Sentry.startSpan(
       { name: "translate", op: "ai" },
-      () => translateRecipe(recipe, language)
+      () => ensureTranslation(recipe, recipe._id, req.userId, language)
     );
-    await saveTranslation(recipeId, language, translated, req.userId);
     res.json(translated);
   } catch (err) {
     res.status(500).json({ error: err.message });

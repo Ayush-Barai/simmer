@@ -361,6 +361,10 @@ export async function ingestRecipe({ url, caption }) {
     throw err;
   }
 
+  if (caption && caption.trim()) {
+    recipe.sourceText = caption.trim().slice(0, 20000);
+  }
+
   recipe.image = await fetchPageImage(url);
   return recipe;
 }

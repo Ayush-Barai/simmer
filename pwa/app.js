@@ -34,6 +34,7 @@ const STOP_WORDS = [
 const state = {
   recipes: [],
   query: "",
+  addMode: "link",
   current: null,
   display: null,
   translations: {},
@@ -440,6 +441,7 @@ function resetSearch() {
 function recipeMatches(recipe, terms) {
   const haystack = [
     recipe.title,
+    recipe.sourceText || "",
     ...(recipe.tags || []),
     ...(recipe.ingredients || []).map((ing) => ing.item),
     ...(recipe.steps || []),
@@ -571,6 +573,14 @@ function renderDetail() {
   const source = $("#detail-source");
   source.hidden = !state.current.sourceUrl;
   if (state.current.sourceUrl) source.href = state.current.sourceUrl;
+
+  const original = $("#detail-original");
+  if (original) {
+    const text = state.current.sourceText || "";
+    original.hidden = !text;
+    original.open = false;
+    $("#detail-original-text").textContent = text;
+  }
 }
 
 function populateLangSelects() {
@@ -590,7 +600,7 @@ function syncLangSelects() {
 function setLangBusy(busy) {
   $$(".lang-select").forEach((s) => (s.disabled = busy));
   const status = $("#lang-status");
-  if (status) status.textContent = busy ? "Translating with Gemma…" : "";
+  if (status) status.textContent = busy ? "Loading translation…" : "";
 }
 
 async function ensureTranslation(lang) {
@@ -1295,11 +1305,35 @@ function clearHistory() {
   if (log) log.innerHTML = "";
 }
 
+function setAddMode(mode) {
+  state.addMode = mode === "text" ? "text" : "link";
+
+  $$(".add-mode").forEach((btn) => {
+    const active = btn.dataset.addMode === state.addMode;
+    btn.classList.toggle("is-active", active);
+    btn.setAttribute("aria-pressed", String(active));
+  });
+
+  $("#add-link-fields").hidden = state.addMode !== "link";
+  $("#add-text-fields").hidden = state.addMode !== "text";
+
+  const hint = $("#add-hint");
+  if (hint) {
+    hint.textContent =
+      state.addMode === "link"
+        ? "Add a link and Simmer will pull out the ingredients and steps."
+        : "Paste a recipe you already have. Simmer keeps your original words and turns them into clean steps.";
+  }
+}
+
 async function addRecipe({ url, caption }) {
   const status = $("#add-status");
   const submit = $("#add-submit");
   status.className = "status";
-  status.textContent = "Reading the description and audio... this can take a minute.";
+  status.textContent =
+    caption && !url
+      ? "Reading your recipe and asking Gemma... this can take a minute."
+      : "Reading the description and audio... this can take a minute.";
   submit.disabled = true;
   try {
     const recipe = await api("/api/ingest", {
@@ -1337,6 +1371,13 @@ function handleSharedLink() {
   if (!url && !text) return false;
   history.replaceState({}, "", "/");
   show("add");
+  if (!url && text) {
+    setAddMode("text");
+    $("#add-description").value = text;
+    addRecipe({ caption: text });
+    return true;
+  }
+  setAddMode("link");
   $("#add-url").value = url;
   addRecipe({ url, caption: text });
   return true;
@@ -1410,9 +1451,37 @@ function wireEvents() {
     });
   }
 
+  $$(".add-mode").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setAddMode(btn.dataset.addMode);
+      const target = state.addMode === "text" ? $("#add-description") : $("#add-url");
+      target?.focus();
+    });
+  });
+
   $("#add-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    addRecipe({ url: $("#add-url").value.trim() });
+    const status = $("#add-status");
+    status.className = "status";
+
+    if (state.addMode === "text") {
+      const text = $("#add-description").value.trim();
+      if (!text) {
+        status.className = "status error";
+        status.textContent = "Paste your recipe first.";
+        return;
+      }
+      addRecipe({ caption: text });
+      return;
+    }
+
+    const url = $("#add-url").value.trim();
+    if (!url) {
+      status.className = "status error";
+      status.textContent = "Add a recipe link first.";
+      return;
+    }
+    addRecipe({ url });
   });
 
   $("#talk-btn").addEventListener("click", openAgentFromTop);

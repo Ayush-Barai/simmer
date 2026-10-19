@@ -97,7 +97,8 @@ a { color: var(--brand); }
   background: none; border: 0; padding: 0.25rem; cursor: pointer;
   color: var(--text); font-size: 1.15rem; font-weight: 700;
 }
-.brand-mark { font-size: 1.3rem; }
+.brand-mark { display: inline-flex; }
+.brand-mark img { width: 1.8rem; height: 1.8rem; border-radius: 0.45rem; display: block; }
 .topbar-actions { display: flex; align-items: center; gap: 0.5rem; }
 .search-row { flex: 1 1 100%; min-width: 0; }
 .searchbar {
@@ -185,6 +186,22 @@ textarea { resize: vertical; }
 
 .status { min-height: 1.2rem; font-size: 0.9rem; color: var(--muted); margin-top: 0.6rem; }
 .status.error { color: var(--danger); }
+
+.add-modes {
+  display: inline-flex; gap: 0.25rem; margin: 0.4rem 0 0.2rem;
+  padding: 0.25rem; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: 999px;
+}
+.add-mode {
+  border: 0; border-radius: 999px; padding: 0.45rem 0.9rem;
+  background: transparent; color: var(--muted);
+  font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+}
+.add-mode.is-active { background: var(--brand); color: var(--brand-ink); }
+.add-mode:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 55%, transparent); outline-offset: 2px; }
+.original { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.original summary { cursor: pointer; font-weight: 600; }
+.original-text { white-space: pre-wrap; margin: 0.6rem 0 0; color: var(--muted); font-size: 0.92rem; }
 
 .lang-row { display: flex; align-items: center; gap: 0.6rem; margin: 0.9rem 0 0.2rem; flex-wrap: wrap; }
 .lang-row label { font-weight: 600; font-size: 0.9rem; color: var(--muted); }

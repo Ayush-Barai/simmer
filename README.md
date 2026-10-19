@@ -8,11 +8,13 @@ Built for the **Hacktoberfest Open-Source AI Challenge (Week 2: Side Hustle)**.
 
 - **Link → recipe:** share a Reel/Short/TikTok or paste a link. Simmer reads the
   description first, then transcribes the audio if the text has no recipe; Gemma extracts
-  ingredients, amounts, timings and ordered steps.
+  ingredients, amounts, timings and ordered steps. You can also paste a recipe you already
+  have — Simmer keeps your original wording and saves a clean, structured version.
 - **Hands-free cooking:** a live voice loop (ElevenLabs Conversational AI) with a browser
   speech fallback, so you can ask questions mid-step without touching the phone.
 - **10 languages:** read, chat and translate in English, Spanish, French, German, Italian,
-  Portuguese, Hindi, Japanese, Chinese and Arabic.
+  Portuguese, Hindi, Japanese, Chinese and Arabic. Translations are saved with the recipe,
+  so switching language is instant.
 - **Private cookbook:** Clerk auth, per-user recipes, thumbnails and saved chat history.
 - **Installable PWA:** Android share target, offline shell and a light/dark theme.
 
@@ -64,7 +66,7 @@ GEMMA_MODEL=gemma-4-26b-a4b-it
 ```bash
 npm run dev
 ```
-Open http://localhost:3000. Paste a recipe link and press
+Open http://localhost:3000. Paste a recipe link or your own recipe text and press
 **Turn it into a recipe**. Everything works with only `GEMMA_API_KEY` set
 (recipes are stored in memory until you connect Atlas).
 
@@ -221,7 +223,7 @@ The app keeps working on the in-memory store until this is fixed.
 
 ## API
 
-- `POST /api/ingest` `{ url, caption? }`
+- `POST /api/ingest` `{ url }` or `{ caption }` (pasted recipe text)
 - `GET /api/recipes`
 - `GET /api/recipes/:id`
 - `DELETE /api/recipes/:id`
@@ -338,7 +340,9 @@ device's built-in voice mode below.
 On a recipe (or in cook mode), pick a **Language** from the dropdown:
 
 - **Gemma** translates the title, ingredients, steps and tags — numbers stay exact.
-- The translation is saved on the recipe in MongoDB, so it is instant next time.
+- Every language is generated once in the background when a recipe is added, then saved in
+  MongoDB. Opening an older recipe fills in any missing languages. Switching language reads
+  the saved translation, so there is **no model call** and it changes instantly.
 - The **spoken** language follows the selection: Simmer answers and reads steps in
   that language, and the mic listens in that language too.
 

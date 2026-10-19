@@ -55,9 +55,17 @@ export async function saveRecipe(doc, ownerId = "guest") {
 }
 
 export async function listRecipes(ownerId = "guest") {
-  if (inMemory) return memory.filter((r) => r.ownerId === ownerId).map((r) => ({ ...r }));
+  if (inMemory) {
+    return memory
+      .filter((r) => r.ownerId === ownerId)
+      .map((r) => {
+        const copy = { ...r };
+        delete copy.translations;
+        return copy;
+      });
+  }
   const docs = await collection
-    .find({ ownerId })
+    .find({ ownerId }, { projection: { translations: 0 } })
     .sort({ createdAt: -1 })
     .limit(200)
     .toArray();
